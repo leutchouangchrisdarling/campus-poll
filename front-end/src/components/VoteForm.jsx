@@ -3,7 +3,6 @@ import { voteOnPoll } from '../services/api';
 
 function VoteForm({ poll, onVoteSuccess }) {
   const [selectedOption, setSelectedOption] = useState(null);
-  const [matricule, setMatricule] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -12,8 +11,10 @@ function VoteForm({ poll, onVoteSuccess }) {
       setError('Veuillez sélectionner une option.');
       return;
     }
-    if (!matricule.trim()) {
-      setError('Veuillez entrer votre matricule.');
+
+    const matricule = localStorage.getItem('matricule');
+    if (!matricule) {
+      setError('Matricule non trouvé. Veuillez vous reconnecter.');
       return;
     }
 
@@ -22,7 +23,7 @@ function VoteForm({ poll, onVoteSuccess }) {
       setError('');
       const res = await voteOnPoll(poll._id, {
         optionIndex: selectedOption,
-        matricule: matricule.trim(),
+        matricule: matricule,
       });
       onVoteSuccess(res.data);
     } catch (err) {
@@ -49,14 +50,6 @@ function VoteForm({ poll, onVoteSuccess }) {
           </label>
         </div>
       ))}
-
-      <input
-        type="text"
-        placeholder="Votre matricule"
-        value={matricule}
-        onChange={(e) => setMatricule(e.target.value)}
-        style={{ display: 'block', marginTop: '12px', padding: '8px', width: '100%' }}
-      />
 
       {error && (
         <p style={{ color: 'red', marginTop: '8px' }}>{error}</p>
